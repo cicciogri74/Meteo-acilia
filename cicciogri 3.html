@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Stazione Meteorologica</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to top, #a2c4ec, #f0f8ff);
+      padding: 20px;
+      text-align: center;
+    }
+    .weather-container {
+      background-color: #ffffffcc;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+      display: inline-block;
+      min-width: 250px;
+    }
+    h1 {
+      color: #003366;
+    }
+    #weather {
+      font-size: 18px;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Stazione Meteorologica</h1>
+  <div class="weather-container">
+    <div id="weather">Caricamento dati meteo...</div>
+  </div>
+
+  <script>
+    async function getWeather() {
+      const apiKey = "fe246ce400ae43c2a46ce400ae13c256";
+      const stationId = "IROME8355";
+      const url = `https://api.weather.com/v2/pws/observations/current?stationId=${stationId}&format=json&units=m&apiKey=${apiKey}`;
+
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error("Errore nella risposta dell'API");
+
+        const data = await response.json();
+        if (!data.observations || data.observations.length === 0) {
+          throw new Error("Nessuna osservazione trovata.");
+        }
+
+        const obs = data.observations[0];
+
+        document.getElementById("weather").innerHTML = `
+          <strong>Temperatura:</strong> ${obs.metric.temp} °C<br>
+          <strong>Umidità:</strong> ${obs.humidity}%<br>
+          <strong>Vento:</strong> ${obs.metric.windSpeed} km/h<br>
+          <strong>Pressione:</strong> ${obs.metric.pressure} hPa<br>
+          <small>Ultimo aggiornamento: ${new Date(obs.obsTimeUtc).toLocaleString()}</small>
+        `;
+      } catch (error) {
+        document.getElementById("weather").innerText = "Errore nel caricamento dei dati meteo.";
+        console.error(error);
+      }
+    }
+
+    getWeather();
+    setInterval(getWeather, 600000); // Aggiorna ogni 10 minuti
+  </script>
+
+</body>
+</html>
